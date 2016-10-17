@@ -96,6 +96,7 @@ public class OSMActivity extends AppCompatActivity {
                 polyline.setGeodesic(true);
                 polyline.setPoints(points);
                 polyline.setColor(aTrack.getColor(i));
+                polyline.setWidth(12);
                 map.getOverlays().add(polyline);
             }
             map.invalidate();

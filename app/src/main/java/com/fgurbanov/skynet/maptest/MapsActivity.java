@@ -4,10 +4,15 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 
 import com.fgurbanov.skynet.maptest.data.TrackData;
@@ -28,11 +33,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    public static String LOG_TAG = "my_log";
     public final static String EXTRA_MESSAGE = "TrackData";
+    public final static String JSON_URL_RES = "http://avionicus.com/android/track_v0649.php?avkey=1M1TE9oeWTDK6gFME9JYWXqpAGc%3D&hash=58ecdea2a91f32aa4c9a1d2ea010adcf2348166a04&track_id=36131&user_id=22";
     public final static double Trans_Color_Const = 12.75;
     private GoogleMap mMap;
 
@@ -46,18 +55,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        //add mapFragment
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
 
         // parse JSON object
         PD = new ProgressDialog(this);
         PD.setMessage("Preparing your track.....");
         PD.setCancelable(false);
 
+        //add mapFragment
+        /*
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        /*
         //parse JSON Object
         parseJsonObject(loadJSONFromAsset());
+        */
+        new ParseTask().execute();
+
+        //add mapFragment
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+
 
         //Set button for switch map activity
         Button changeMapButton = (Button) findViewById(R.id.changeMapToOSM);
@@ -94,7 +115,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .add((aTrack.getTrackPointses().get(i).getCoordinates()))
                         .add(aTrack.getTrackPointses().get(i+1).getCoordinates())
                         .geodesic(true)
-                        .color(aTrack.getColor(i));
+                        .color(aTrack.getColor(i))
+                        .width(12);
 
                 mMap.addPolyline(polylineOptions);
             }
@@ -110,20 +132,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
     private void parseJsonObject(String strJson) {
         PD.show();
-
+        Log.d(LOG_TAG, "RECIVE SMT TO PARCE");
         try {
             JSONObject  jsonRootObject = new JSONObject(strJson);
 
@@ -140,6 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             aTrack = new TrackData(sTemp, dtStart, dtEnd);
 
             // read aPoints
+            // Speed, coordinates and etc.
             JSONArray jsonPointsArray = jsonRootObject.getJSONArray("aPoints");
             ArrayList<TrackPoints> pointsList = new ArrayList<>();
             for( int i = 0; i <jsonPointsArray.length(); i++){
@@ -160,17 +172,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             aTrack.setTrackPointses(pointsList);
             PD.dismiss();
-
-        } catch (JSONException e) { e.printStackTrace(); PD.dismiss(); }
+            Log.d(LOG_TAG, "I am poarse smth");
+            Log.d(LOG_TAG, aTrack.getType());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            PD.dismiss();
+            Log.d(LOG_TAG, "ALLERT MTFKER");
+        }
+        onMapReady(mMap);
     }
 
 
     public String loadJSONFromAsset() {
-        String json = null;
+        //String json = null;
+        String json;
         try {
             InputStream is = getAssets().open("track_v0649.json");
             int size = is.available();
             byte[] buffer = new byte[size];
+
             is.read(buffer);
             is.close();
             json = new String(buffer, "UTF-8");
@@ -180,5 +200,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return json;
     }
+
+    private class ParseTask extends AsyncTask<Void, Void, String> {
+
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+        String resultJson = "";
+
+        @Override
+        protected String doInBackground(Void... params) {
+            // получаем данные с внешнего ресурса
+            try {
+                //URL url = new URL("http://androiddocs.ru/api/friends.json");
+                //create URL to Server
+                URL url = new URL(JSON_URL_RES);
+
+                //create connection
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                //generate data input stream
+                InputStream inputStream = urlConnection.getInputStream();
+                //StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
+
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+
+                resultJson = buffer.toString();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return resultJson;
+        }
+
+        @Override
+        protected void onPostExecute(String strJson) {
+            super.onPostExecute(strJson);
+            Log.d(LOG_TAG, strJson);
+            try {
+                parseJsonObject(strJson);
+            } catch (Exception e){
+                Log.d(LOG_TAG, "not parse");
+            }
+        }
+    }
+
 
 }

@@ -8,6 +8,7 @@ import java.util.Date;
 
 /**
  * Created by SkyNet on 10.10.2016.
+ * this class illustrate information about track
  */
 
 public class TrackData implements Serializable {
@@ -124,7 +125,7 @@ public class TrackData implements Serializable {
             int blue;
             if (speed > 7.5 ) {blue = 0;}
             else if (speed <2.5) {blue = 255;}
-            else {blue = (int) (-12.854* speed* speed+ 82.863*speed + 119.38);}
+            else {blue = (int) (-13* speed* speed+ 82.863*speed + 119.38);}
             color = Color.rgb(red, green, blue);
         }
         return color;
