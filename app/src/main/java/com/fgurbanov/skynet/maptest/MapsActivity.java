@@ -55,22 +55,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-
-
         // parse JSON object
         PD = new ProgressDialog(this);
         PD.setMessage("Preparing your track.....");
         PD.setCancelable(false);
 
-        //add mapFragment
-        /*
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        /*
         //parse JSON Object
-        parseJsonObject(loadJSONFromAsset());
-        */
+        //parseJsonObject(loadJSONFromAsset());
+
+        // Connected to server, load JSON, and parse
         new ParseTask().execute();
 
         //add mapFragment
@@ -209,6 +202,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         protected String doInBackground(Void... params) {
+            //PD.show();
             // получаем данные с внешнего ресурса
             try {
                 //URL url = new URL("http://androiddocs.ru/api/friends.json");

@@ -109,11 +109,16 @@ public class TrackData implements Serializable {
             double speed = (trackPointses.get(i).getSpeed() + trackPointses.get(i+1).getSpeed()) / 2;
             // red
             int red;
+
             if (speed > 7.5){
                 red = (int) (-12.542*speed*speed + 361.03*speed - 2345.9 );
             } else if (speed >= 12.5){red = 255;}
             else {red = 0;}
-
+/*
+            if(speed >10){
+                red = (int )(22.8*Math.sqrt(speed*speed -100));
+            } else if (speed >= 15) {red = 255;}
+*/
             // green
             int green;
             if (speed > 7.5) {
