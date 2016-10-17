@@ -1,9 +1,7 @@
 package com.fgurbanov.skynet.maptest;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -13,7 +11,6 @@ import android.widget.Button;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 
 import com.fgurbanov.skynet.maptest.data.TrackData;
 import com.fgurbanov.skynet.maptest.data.TrackPoints;
@@ -24,7 +21,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -176,12 +172,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             aTrack.setTrackPointses(pointsList);
             PD.dismiss();
-            Log.d(LOG_TAG, "I am poarse smth");
-            Log.d(LOG_TAG, aTrack.getType());
         } catch (JSONException e) {
             e.printStackTrace();
             PD.dismiss();
-            Log.d(LOG_TAG, "ALLERT MTFKER");
         }
         onMapReady(mMap);
     }
@@ -247,7 +240,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         protected void onPostExecute(String strJson) {
             super.onPostExecute(strJson);
-            Log.d(LOG_TAG, strJson);
             try {
                 parseJsonObject(strJson);
             } catch (Exception e){
