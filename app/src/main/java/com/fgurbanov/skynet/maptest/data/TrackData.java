@@ -1,5 +1,7 @@
 package com.fgurbanov.skynet.maptest.data;
 
+import android.graphics.Color;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -97,6 +99,35 @@ public class TrackData implements Serializable {
 
     public void setDt_end(String dt_end) {
         this.dt_end = dt_end;
+    }
+
+    public int getColor(int i){
+        int color = 255;
+        if( i < (trackPointses.size()-1)) {
+            // find AVG speed in the area
+            double speed = (trackPointses.get(i).getSpeed() + trackPointses.get(i+1).getSpeed()) / 2;
+            // red
+            int red;
+            if (speed > 7.5){
+                red = (int) (-12.542*speed*speed + 361.03*speed - 2345.9 );
+            } else if (speed >= 12.5){red = 255;}
+            else {red = 0;}
+
+            // green
+            int green;
+            if (speed > 7.5) {
+                green = (int) (-12.854*speed * speed + 339.94*speed - 1994.7);
+            } else if (speed >= 17.5) {green = 0;}
+            else {green = 255;}
+
+            // blue
+            int blue;
+            if (speed > 7.5 ) {blue = 0;}
+            else if (speed <2.5) {blue = 255;}
+            else {blue = (int) (-12.854* speed* speed+ 82.863*speed + 119.38);}
+            color = Color.rgb(red, green, blue);
+        }
+        return color;
     }
 
    /*

@@ -19,6 +19,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     public final static String EXTRA_MESSAGE = "TrackData";
+    public final static double Trans_Color_Const = 12.75;
     private GoogleMap mMap;
 
     ProgressDialog PD;
@@ -44,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        //add mapFragment
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -53,8 +56,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         PD.setMessage("Preparing your track.....");
         PD.setCancelable(false);
 
+        //parse JSON Object
         parseJsonObject(loadJSONFromAsset());
 
+        //Set button for switch map activity
         Button changeMapButton = (Button) findViewById(R.id.changeMapToOSM);
         changeMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,60 +81,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         UiSettings myUiSettings = mMap.getUiSettings();
         myUiSettings.setZoomControlsEnabled(true);
 
-        LatLng startTrack = null;
         try {
-            startTrack = aTrack.getTrackPointses().get(0).getCoordinates();
-
+            LatLng startTrack = aTrack.getTrackPointses().get(0).getCoordinates();
+            //set marker of beginning of track
             mMap.addMarker(new MarkerOptions().position(startTrack).title("Marker in Start"));
 
+            //create gradient line on Map
+            // this line is sum of mini line
             int size = aTrack.getTrackPointses().size();
-            int speedFlag = 5;
-            PolylineOptions rectOptions = new PolylineOptions();
-            double speed = 0;
+            for(int i = 0; i < size-1; i++ ){
+                PolylineOptions polylineOptions = new PolylineOptions()
+                        .add((aTrack.getTrackPointses().get(i).getCoordinates()))
+                        .add(aTrack.getTrackPointses().get(i+1).getCoordinates())
+                        .geodesic(true)
+                        .color(aTrack.getColor(i));
 
-            for(int i = 0; i < size; i++ ){
-                rectOptions.geodesic(true);
-                speed = aTrack.getTrackPointses().get(i).getSpeed();
-                if (speed < 5) {
-                    if (speedFlag != 5) {
-                        rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates());
-                        mMap.addPolyline(rectOptions);
-                        rectOptions = new PolylineOptions();
-                    }
-                    rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates()).color(Color.parseColor("#40E0D0"));
-                    speedFlag = 5;
-                } else if (speed < 10) {
-                    if (speedFlag != 10) {
-                        rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates());
-                        mMap.addPolyline(rectOptions);
-                        rectOptions = new PolylineOptions();
-                    }
-                    rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates()).color(Color.parseColor("#008000"));
-                    speedFlag = 10;
-                } else if (speed < 15){
-                    if (speedFlag != 15) {
-                        rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates());
-                        mMap.addPolyline(rectOptions);
-                        rectOptions = new PolylineOptions();
-                    }
-
-                    rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates()).color(Color.parseColor("#FFFF00"));
-                    speedFlag = 15;
-                    } else  {
-                        if (speedFlag != 20) {
-                            rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates());
-                            mMap.addPolyline(rectOptions);
-                            rectOptions = new PolylineOptions();
-                        }
-                    rectOptions.add(aTrack.getTrackPointses().get(i).getCoordinates()).color(Color.parseColor("#FF0000"));
-                    speedFlag = 20;
-                    }
-
+                mMap.addPolyline(polylineOptions);
             }
+
+            // set marker of  end track
             LatLng endTrack = aTrack.getTrackPointses().get(size-1).getCoordinates();
             mMap.addMarker(new MarkerOptions().position(endTrack).title("Marker in End"));
 
-
+            // set camera at the beginning of track
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startTrack, 15));
         } catch (Exception e) {
             e.printStackTrace();
