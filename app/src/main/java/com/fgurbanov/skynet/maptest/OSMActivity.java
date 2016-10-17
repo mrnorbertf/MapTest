@@ -92,11 +92,13 @@ public class OSMActivity extends AppCompatActivity {
                 List<GeoPoint> points = new ArrayList<>(2);
                 points.add(aTrack.getTrackPointses().get(i).getGeoPoint());
                 points.add(aTrack.getTrackPointses().get(i + 1).getGeoPoint());
+
                 Polyline polyline = new Polyline();
-                polyline.setGeodesic(true);
                 polyline.setPoints(points);
+                polyline.setGeodesic(true);
                 polyline.setColor(aTrack.getColor(i));
                 polyline.setWidth(12);
+
                 map.getOverlays().add(polyline);
             }
             map.invalidate();

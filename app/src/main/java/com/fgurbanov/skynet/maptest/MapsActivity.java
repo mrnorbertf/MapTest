@@ -104,14 +104,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // this line is sum of mini line
             int size = aTrack.getTrackPointses().size();
             for(int i = 0; i < size-1; i++ ){
-                PolylineOptions polylineOptions = new PolylineOptions()
+
+                LatLng midpoint = new LatLng(
+                        (aTrack.getTrackPointses().get(i).getCoordinates().latitude + (aTrack.getTrackPointses().get(i+1).getCoordinates()).latitude)/2,
+                        (aTrack.getTrackPointses().get(i).getCoordinates().longitude + (aTrack.getTrackPointses().get(i+1).getCoordinates()).longitude)/2
+
+                );
+                PolylineOptions polylineOptions1 = new PolylineOptions()
                         .add((aTrack.getTrackPointses().get(i).getCoordinates()))
-                        .add(aTrack.getTrackPointses().get(i+1).getCoordinates())
+                        .add(midpoint)
                         .geodesic(true)
                         .color(aTrack.getColor(i))
                         .width(12);
-
-                mMap.addPolyline(polylineOptions);
+                PolylineOptions polylineOptions2 = new PolylineOptions()
+                        .add(midpoint)
+                        .add(aTrack.getTrackPointses().get(i+1).getCoordinates())
+                        .geodesic(true)
+                        .color(aTrack.getColor(i+1))
+                        .width(12);
+                mMap.addPolyline(polylineOptions1);
+                mMap.addPolyline(polylineOptions2);
             }
 
             // set marker of  end track
@@ -127,7 +139,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void parseJsonObject(String strJson) {
         PD.show();
-        Log.d(LOG_TAG, "RECIVE SMT TO PARCE");
         try {
             JSONObject  jsonRootObject = new JSONObject(strJson);
 
@@ -205,7 +216,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //PD.show();
             // получаем данные с внешнего ресурса
             try {
-                //URL url = new URL("http://androiddocs.ru/api/friends.json");
                 //create URL to Server
                 URL url = new URL(JSON_URL_RES);
 
@@ -216,7 +226,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //generate data input stream
                 InputStream inputStream = urlConnection.getInputStream();
-                //StringBuffer buffer = new StringBuffer();
+
                 StringBuilder buffer = new StringBuilder();
 
                 reader = new BufferedReader(new InputStreamReader(inputStream));
