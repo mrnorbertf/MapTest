@@ -7,3 +7,4 @@
 
 Построение градиентного маршрута по соответствующим коорднатам из данного файла
 
+![Image alt](https://github.com/mrnorbertf/MapTest/blob/master/Screenshot_1480450987.png)
